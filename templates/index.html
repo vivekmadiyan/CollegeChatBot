@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABES Institute of Technology Chatbot</title>
+    <style>
+        /* General Body Styling with College Image Background */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('/static/abesit.png');  /* Replace with your actual image path */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            color: #fff;
+        }
+
+        /* Header Section with Logo and College Name */
+        #header {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        #header img {
+            width: 60px;/* Adjust the size of the logo */
+            height: auto;
+        }
+
+        #header h1 {
+            margin: 10px 0;
+            font-size: 30px;
+             font-weight: 800;  /* Orange color for the title */
+        }
+
+        #header p {
+            font-size: 18px;
+            color: #fff;
+        }
+
+        /* Flexbox Container for Chatbot and College Info */
+        #mainContainer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 50px;
+            gap: 50px;
+        }
+
+        /* College Info Section */
+        #collegeInfo {
+            max-width: 350px;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Chatbot Section */
+        #chatContainer {
+            max-width: 600px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);  /* Semi-transparent dark background */
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        #chatContainer h2 {
+            text-align: center;
+            color: #ff9900;
+            font-size: 24px;
+        }
+
+        /* Messages Area */
+        #messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9);  /* Light background for messages */
+            border-radius: 5px;
+            color: #333;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        #messages div {
+            margin: 5px 0;
+        }
+
+        .user-message {
+            color: #2a5d84;  /* Blue color for user messages */
+        }
+
+        .bot-message {
+            color: #d2691e;  /* Brown color for bot responses */
+        }
+
+        /* User Input Area */
+        #userInput {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        /* Input Field */
+        #userQuery {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        /* Send Button */
+        #sendBtn {
+            padding: 10px 20px;
+            margin-left: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #sendBtn:hover {
+            background-color: #0056b3;
+        }
+        #header img{
+         font-size: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Header Section with Logo and College Name -->
+    <div id="header">
+        <img src="/static/abesit1.png" alt="ABES Institute Logo"> <!-- Replace with your actual logo path -->
+        <h1>ABES Institute of Technology</h1>
+        <p>AKTU College Code 290</p>
+    </div>
+
+    <!-- Main Container with Flexbox for College Info and Chatbot -->
+    <div id="mainContainer">
+        <!-- College Info Section -->
+        <div id="collegeInfo">
+            <h2>About Us</h2>
+            <p>ABES Institute of Technology, established in 2008, is a premier institution affiliated with Dr. A.P.J. Abdul Kalam Technical University (AKTU).</p>
+            <p>AKTU College Code: 290</p>
+            
+        </div>
+
+        <!-- Chatbot Section -->
+        <div id="chatContainer">
+            <h2>College Chatbot</h2>
+            <div id="messages"></div>
+            <div id="userInput">
+                <input type="text" id="userQuery" placeholder="Type your question here..." />
+                <button id="sendBtn" onclick="askChatbot()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to interact with the Flask server and get the bot's response
+        async function askChatbot() {
+            const query = document.getElementById("userQuery").value.trim();
+            if (query === "") return;
+
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML += `<div class="user-message"><b>You:</b> ${query}</div>`;  // Display the user's query with specific style
+
+            try {
+                // Send the query to the Flask server
+                const response = await fetch("http://127.0.0.1:5000/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ query }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Get the response from the server
+                const data = await response.json();
+                messagesDiv.innerHTML += `<div class="bot-message"><b>Bot:</b> ${data.response}</div>`;  // Display the bot's response with specific style
+                document.getElementById("userQuery").value = '';  // Clear the input field
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Scroll to the bottom
+            } catch (error) {
+                console.error("Error:", error);  // Log errors in the browser console
+                messagesDiv.innerHTML += `<div class="bot-message"><b>Bot:</b> Oops! Something went wrong. Please try again later.</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
